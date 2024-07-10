@@ -114,7 +114,106 @@
             }
 
 
-    render()
+                function update() {
+                    ball.x += ball.velocityX;
+                    ball.y += ball.velocityY;
+
+                    if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+                        ball.velocityY = -ball.velocityY;
+                    }
+
+                    let player = (ball.x < canvas.width / 2) ? user : com;
+                    if (collision(ball, player)) {
+                        let collidePoint = (ball.y - (player.y + player.height / 2));
+                        collidePoint = collidePoint / (player.height / 2);
+                        let angleRad = collidePoint * Math.PI / 4;
+                        let direction = (ball.x < canvas.width / 2) ? 1 : -1;
+                        ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+                        ball.velocityY = ball.speed * Math.sin(angleRad);
+                        ball.speed += 0.1;
+                    }
+
+                    if (ball.x - ball.radius < 0) {
+                        com.score++;
+                        resetBall();
+                    } else if (ball.x + ball.radius > canvas.width) {
+                        user.score++;
+                        resetBall();
+                    }
+                }
+
+                function collision(b, p) {
+                    p.top = p.y;
+                    p.bottom = p.y + p.height;
+                    p.left = p.x;
+                    p.right = p.x + p.width;
+
+                    b.top = b.y - b.radius;
+                    b.bottom = b.y + b.radius;
+                    b.left = b.x - b.radius;
+                    b.right = b.x + b.radius;
+
+                    return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
+                }
+
+                function resetBall() {
+                    ball.x = canvas.width / 2;
+                    ball.y = canvas.height / 2;
+                    ball.speed = 5;
+                    ball.velocityX = -ball.velocityX;
+                }
+
+                document.addEventListener("keydown", movePaddle);
+
+                function movePaddle(evt) {
+
+                    console.log(evt.keyCode);
+                    switch (evt.keyCode) {
+                        case 38: // 
+                            user.y -= 20;
+                            evt.preventDefault();
+                            break;
+                        case 40:
+                            user.y += 20;
+                            evt.preventDefault();
+                            break;
+                        case 87:
+                            user.y -= 20;
+                            evt.preventDefault();
+                            break;
+                        case 83:
+                            user.y += 20;
+                            evt.preventDefault();
+                            break;
+                    }
+                }
+
+                function aiLogic() {
+                    const comSpeed = 4;
+                    const comPaddleCenter = com.y + com.height / 2;
+
+                    if (comPaddleCenter < ball.y - 35) {
+                        com.y += comSpeed;
+                    } else if (comPaddleCenter > ball.y + 35) {
+                        com.y -= comSpeed;
+                    }
+                }
+
+
+                function game() {
+                    update();
+                    render();
+                    aiLogic();
+                }
+                var framePerSecond = 50;
+                var interval = setInterval(game, 1000 / framePerSecond);
+
+                function changeFPS() {
+                    clearInterval(interval);
+                    framePerSecond = document.getElementById('fpsDropdown').value;
+                    interval = setInterval(game, 1000 / framePerSecond);
+
+                }
 
 
         </script>
